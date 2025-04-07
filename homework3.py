@@ -165,34 +165,47 @@ def train(policy, optimizer, num_episodes, max_steps_per_episode, discount_facto
             print(f"\nEpisode {episode}\tAverage Reward (Last 100): {np.mean(episode_rewards_history):.2f}")
 
     # Save the trained model
-    torch.save(policy.state_dict(), 'reinforce_hw3_continuous_model.pth')
-    print("\nTraining finished! Model saved as reinforce_hw3_continuous_model.pth")
+    torch.save(policy.state_dict(), 'hw3_n.pth')
+    print("\nTraining finished! Model saved as hw3_n.pth")
     return all_episode_rewards
 
-def test(env, num_evaluation_episodes, max_steps_per_episode, policy):
+def test(env, num_evaluation_episodes, max_steps_per_episode, model_path):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    state_size = env.high_level_state().shape[0]
+    action_size = env._action_dim
+    policy = ReinforcePolicy(state_size, action_size).to(device)
+    policy.load_state_dict(torch.load(model_path, map_location=device))
+    policy.eval()  # Set the model to evaluation mode
+
     evaluation_rewards = []
-    for _ in range(num_evaluation_episodes):
-        current_state = env.reset()
-        current_state = env.high_level_state()
-        total_reward = 0
-        for _ in range(max_steps_per_episode):
-            action, _ = policy.act(current_state)
-            next_state, reward, done, truncated = env.step(action)
-            total_reward += reward
-            current_state = next_state
-            if done or truncated:
-                break
-        evaluation_rewards.append(total_reward)
+    with torch.no_grad():  # Disable gradient calculations during evaluation
+        for _ in range(num_evaluation_episodes):
+            # Reset the environment at the beginning of each evaluation episode
+            env.reset()
+            env._set_joint_position({env._gripper_idx: 0.80})
+
+            current_state = env.high_level_state()
+            total_reward = 0
+            for _ in range(max_steps_per_episode):
+                action, _ = policy.act(current_state)
+                next_state, reward, done, truncated = env.step(action)
+                total_reward += reward
+                current_state = next_state
+                if done or truncated:
+                    break
+            evaluation_rewards.append(total_reward)
+
     mean_reward = np.mean(evaluation_rewards)
     std_reward = np.std(evaluation_rewards)
     print(f"Evaluation Mean Reward: {mean_reward:.2f}, Std Reward: {std_reward:.2f}")
     return mean_reward, std_reward
 
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    env = Hw3Env(render_mode="offscreen")
+    env = Hw3Env(render_mode="gui")
 
     state_size = env.high_level_state().shape[0]
     action_size = env._action_dim  # Updated action size
@@ -209,11 +222,13 @@ if __name__ == "__main__":
     policy = ReinforcePolicy(state_size, action_size).to(device)
     optimizer = optim.Adam(policy.parameters(), lr=learning_rate)
 
-    # Training the agent
+    # Training the agent 
     all_rewards = train(policy, optimizer, training_episodes, max_episode_steps, gamma, print_every, env)
 
     # Evaluating the agent
-    mean_reward, std_reward = test(env, evaluation_episodes, max_episode_steps, policy)
+    model_save_path = 'hw3_n.pth'
+
+    mean_reward, std_reward = test(env, evaluation_episodes, max_episode_steps, model_save_path)
 
     # To plot and save all episode rewards
     plt.figure(figsize=(12, 6))
