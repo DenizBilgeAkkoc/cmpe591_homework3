@@ -92,10 +92,11 @@ The training process for the algorithms is visualized through reward plots. Belo
 ### Part 1: Soft Actor Critic (SAC)
 ![Final Reward Plot - SAC](https://github.com/DenizBilgeAkkoc/cmpe591_homework3/blob/main/soft_actor_critic/sac_plots/rewards_plot_final.png)
 
-
+I know this is a terrible plot because I forgot to clip while plotting so here is a less trained version with clipped plot:
+![Clipped Reward Plot - SAC](https://github.com/DenizBilgeAkkoc/cmpe591_homework3/blob/main/soft_actor_critic/sac_plots/rewards_plot_clipped_final.png)
 
 ### Part 2: Vanilla Policy Gradient (REINFORCE)
-![Final Reward Plot - REINFORCE](https://github.com/DenizBilgeAkkoc/cmpe591_homework3/blob/main/reinforce_plots/rewards_plot_final.png)
+![Final Reward Plot - REINFORCE](https://github.com/DenizBilgeAkkoc/cmpe591_homework3/blob/main/vanilla_policy_gradient/reinforce_plots/rewards_plot_final.png)
 
 ---
 
