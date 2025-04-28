@@ -5,7 +5,7 @@ import numpy as np
 import os
 from agent import SACAgent 
 
-MODEL_PATH = "sac_plots/sac_agent_episode_10000.pt" 
+MODEL_PATH = "sac_plots/sac_agent_final.pt" 
 NUM_TEST_EPISODES = 10     
 MAX_EPISODE_STEPS = 200    
 
